@@ -12,42 +12,42 @@ Data 2024-01-02 → 2024-06-28; out-of-sample 2024-03-01 → 2024-06-28, 4 walk-
 
 | metric | meta-model | base-rate predictor |
 |---|---|---|
-| ROC-AUC | 0.5999 ± 0.0010 | 0.5 (cost-rule score: 0.6052) |
+| ROC-AUC | 0.5999 ± 0.0010 | 0.5 (cost-rule score: 0.6052; logistic regression: 0.5792) |
 | Brier | 0.1915 ± 0.0004 | 0.1966 ± 0.0000 |
 | Log-loss | 0.5698 ± 0.0013 | 0.5824 ± 0.0000 |
 | Brier skill score | 0.0256 ± 0.0020 | 0 |
 
 ## Trading impact (same trades, Fusion Zero costs)
 
-| policy | trades | win rate | avg R net | total return | CAGR | max DD | Sharpe | Sortino | Calmar |
-|---|---|---|---|---|---|---|---|---|---|
-| Fixed 1% risk | 470 ± 0 | 26.8% ± 0.0% | -0.195 ± 0.000 | -61.4% ± 0.0% | -94.6% ± 0.0% | 67.6% ± 0.0% | -4.68 ± 0.00 | -5.12 ± 0.00 | -1.40 ± 0.00 |
-| ATR-scaled risk | 452 ± 0 | 26.1% ± 0.0% | -0.194 ± 0.000 | -67.9% ± 0.0% | -96.9% ± 0.0% | 72.3% ± 0.0% | -5.30 ± 0.00 | -5.70 ± 0.00 | -1.34 ± 0.00 |
-| Cost-rule filter (no ML) | 155 ± 0 | 36.1% ± 0.0% | -0.047 ± 0.000 | -6.5% ± 0.0% | -18.7% ± 0.0% | 21.0% ± 0.0% | -0.68 ± 0.00 | -0.98 ± 0.00 | -0.89 ± 0.00 |
-| Meta-model filter | 232 ± 47 | 30.9% ± 0.5% | -0.103 ± 0.022 | -22.3% ± 8.1% | -53.1% ± 14.7% | 37.4% ± 6.2% | -1.73 ± 0.56 | -2.12 ± 0.65 | -1.41 ± 0.16 |
-| Meta-model ¼-Kelly | 178 ± 4 | 34.5% ± 1.9% | -0.004 ± 0.056 | 7.0% ± 12.6% | 25.7% ± 44.6% | 20.8% ± 5.8% | 0.67 ± 0.90 | 1.12 ± 1.51 | 1.60 ± 2.59 |
+| policy | trades | avg risk | win rate | avg R net | risk-weighted R | total return | CAGR | max DD | Sharpe | Sortino | Calmar |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Fixed 1% risk | 472 ± 0 | 1.0% ± 0.0% | 26.7% ± 0.0% | -0.197 ± 0.000 | -0.197 ± 0.000 | -62.5% ± 0.0% | -95.1% ± 0.0% | 68.8% ± 0.0% | -4.72 ± 0.00 | -5.16 ± 0.00 | -1.38 ± 0.00 |
+| ATR-scaled risk | 472 ± 0 | 0.9% ± 0.0% | 26.7% ± 0.0% | -0.197 ± 0.000 | -0.256 ± 0.000 | -69.2% ± 0.0% | -97.3% ± 0.0% | 73.4% ± 0.0% | -5.43 ± 0.00 | -5.80 ± 0.00 | -1.33 ± 0.00 |
+| Cost-rule filter (no ML) | 155 ± 0 | 1.0% ± 0.0% | 36.1% ± 0.0% | -0.047 ± 0.000 | -0.047 ± 0.000 | -7.9% ± 0.0% | -22.4% ± 0.0% | 21.5% ± 0.0% | -0.83 ± 0.00 | -1.19 ± 0.00 | -1.04 ± 0.00 |
+| Meta-model filter | 232 ± 47 | 1.0% ± 0.0% | 30.9% ± 0.5% | -0.103 ± 0.022 | -0.103 ± 0.022 | -23.2% ± 7.8% | -54.7% ± 14.0% | 37.7% ± 5.8% | -1.79 ± 0.52 | -2.19 ± 0.61 | -1.44 ± 0.15 |
+| Meta-model ¼-Kelly | 184 ± 1 | 1.0% ± 0.0% | 34.4% ± 2.0% | -0.011 ± 0.065 | 0.043 ± 0.065 | 6.0% ± 12.0% | 22.0% ± 41.6% | 21.3% ± 5.6% | 0.60 ± 0.85 | 0.99 ± 1.41 | 1.34 ± 2.30 |
 
 ## Sharpe differences (moving-block bootstrap of daily returns)
 
 | policy | vs | seed | ΔSharpe | 95% CI | share of resamples ≤ 0 |
 |---|---|---|---|---|---|
-| ATR-scaled risk | Fixed 1% risk | 0 | -0.63 | [-1.58, +0.43] | 0.89 |
-| Cost-rule filter (no ML) | Fixed 1% risk | 0 | +4.16 | [+0.92, +7.29] | 0.01 |
-| Meta-model filter | Fixed 1% risk | 0 | +3.28 | [+0.67, +6.32] | 0.01 |
-| Meta-model filter | Fixed 1% risk | 1 | +2.52 | [-0.10, +4.98] | 0.04 |
-| Meta-model ¼-Kelly | Fixed 1% risk | 0 | +6.15 | [+3.01, +9.48] | 0.00 |
-| Meta-model ¼-Kelly | Fixed 1% risk | 1 | +4.87 | [+1.79, +7.98] | 0.00 |
-| Meta-model filter | Cost-rule filter (no ML) | 0 | -0.87 | [-4.35, +3.48] | 0.61 |
-| Meta-model filter | Cost-rule filter (no ML) | 1 | -1.64 | [-4.77, +1.58] | 0.83 |
-| Meta-model ¼-Kelly | Cost-rule filter (no ML) | 0 | +1.99 | [-0.22, +5.27] | 0.04 |
-| Meta-model ¼-Kelly | Cost-rule filter (no ML) | 1 | +0.72 | [-2.45, +3.29] | 0.32 |
+| ATR-scaled risk | Fixed 1% risk | 0 | -0.73 | [-1.59, +0.23] | 0.93 |
+| Cost-rule filter (no ML) | Fixed 1% risk | 0 | +4.04 | [+0.80, +7.21] | 0.01 |
+| Meta-model filter | Fixed 1% risk | 0 | +3.24 | [+0.68, +6.19] | 0.01 |
+| Meta-model filter | Fixed 1% risk | 1 | +2.53 | [+0.07, +4.79] | 0.02 |
+| Meta-model ¼-Kelly | Fixed 1% risk | 0 | +6.08 | [+3.03, +9.29] | 0.00 |
+| Meta-model ¼-Kelly | Fixed 1% risk | 1 | +4.87 | [+1.80, +7.87] | 0.00 |
+| Meta-model filter | Cost-rule filter (no ML) | 0 | -0.80 | [-4.26, +3.51] | 0.61 |
+| Meta-model filter | Cost-rule filter (no ML) | 1 | -1.52 | [-4.60, +1.65] | 0.82 |
+| Meta-model ¼-Kelly | Cost-rule filter (no ML) | 0 | +2.04 | [-0.13, +5.32] | 0.04 |
+| Meta-model ¼-Kelly | Cost-rule filter (no ML) | 1 | +0.83 | [-2.35, +3.29] | 0.29 |
 
 ## Per-seed
 
 | seed | auc | brier_skill | meta_filter.trades | meta_filter.total_return | meta_filter.max_drawdown | meta_filter.sharpe | kelly.trades | kelly.total_return | kelly.max_drawdown | kelly.sharpe |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 0 | 0.6006 | 0.0241 | 198 | -0.1661 | 0.3303 | -1.3356 | 176 | 0.1588 | 0.1667 | 1.3068 |
-| 1 | 0.5991 | 0.0270 | 265 | -0.2801 | 0.4183 | -2.1286 | 181 | -0.0195 | 0.2492 | 0.0346 |
+| 0 | 0.6006 | 0.0241 | 198 | -0.1762 | 0.3354 | -1.4179 | 184 | 0.1448 | 0.1735 | 1.2032 |
+| 1 | 0.5991 | 0.0270 | 265 | -0.2872 | 0.4181 | -2.1590 | 185 | -0.0247 | 0.2523 | -0.0024 |
 
 ## Primary stream by year (OOS)
 

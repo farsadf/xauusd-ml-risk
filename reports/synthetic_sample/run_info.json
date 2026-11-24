@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-11-24T20:46:16+00:00",
-  "git_commit": null,
+  "created_utc": "2026-11-24T21:03:12+00:00",
+  "git_commit": "48ce97873b2fcc95481199e4d3b3257d8599499a",
   "python": "3.10.22",
   "platform": "macOS-27.2.1-arm64-arm-64bit",
   "versions": {
@@ -105,7 +105,7 @@
         "fraction": 0.25,
         "max_risk": 0.02
       },
-      "round_lots": true,
+      "round_lots": false,
       "lot_step": 0.01
     },
     "report": {
