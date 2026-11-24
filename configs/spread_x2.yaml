@@ -1,0 +1,92 @@
+# Full run on public HistData XAUUSD 1m BID bars, 2019-01 -> 2026-11 (download with
+# scripts/download_histdata.py; verify timestamps with scripts/check_timezone.py).
+# Paths are relative to the working directory.
+run_name: xauusd_histdata_2019_2026_spread_x2
+
+data:
+  path: ../xauusd-ml-data/histdata     # file or directory of .parquet/.csv(.gz) files in the documented format
+  start: "2019-01-01"
+  end: "2026-11-13"                    # inclusive (last available HistData day at download time)
+  bar_minutes: 5                       # primary-strategy / feature timeframe
+  # Bid-only source -> ask = bid + modelled spread. $0.20/oz: upper end of the bot's
+  # observed Fusion Zero XAU spread (~$0.09-0.20). Dukascopy's retail feed measured
+  # ~$0.30 (flat across hours, ~constant in USD 2019->2024). Sensitivity: configs/spread_x2.yaml.
+  spread_model: {type: flat_usd, usd: 0.40}   # SENSITIVITY: 2x base spread
+output_dir: ../xauusd-ml-data/runs     # models + per-trade predictions (kept outside the repo)
+
+primary:                               # TOY public primary model (not a production strategy)
+  ema_fast: 20
+  ema_slow: 50
+  swing_lookback: 10                   # stop at the 10-bar swing low (long) / high (short), signal bar included
+  tp_r: 2.5                            # take-profit at 2.5 x initial risk
+  min_risk_spreads: 2.0                # skip signals whose stop distance < 2 x spread at entry
+  max_entry_delay_minutes: 5           # skip if the next tradable minute is > 5 min after the signal bar close (weekend/daily break)
+  max_hold_minutes: 2880               # time exit after 2 days (bounds the label horizon for purging); hit rate is reported
+  warmup_bars: 200
+
+costs:                                 # Fusion Markets "Zero" account
+  commission_per_side_per_lot: 2.25    # USD
+  contract_size: 100                   # oz per lot
+  extra_slippage_per_side: 0.0         # USD/oz added against us on entry and exit (spread is already in bid/ask fills)
+
+features:
+  atr_window: 20
+  bb_window: 20
+  bb_k: 2.0
+  stoch_k: 14
+  stoch_smooth: 3
+  stoch_d: 3
+  adx_window: 14
+  use_spread: false                    # spread_atr dropped: spread is modelled (constant), not observed
+  include_trade_context: true          # side and stop_atr from the toy primary signal
+
+model:
+  base_params:
+    objective: binary
+    learning_rate: 0.03
+    feature_fraction: 0.8
+    bagging_fraction: 0.8
+    bagging_freq: 1
+    lambda_l2: 1.0
+    num_threads: 1
+    deterministic: true
+    force_row_wise: true
+    verbose: -1
+  search:                              # tuned INSIDE each training window only
+    max_depth: [3, 5]
+    min_data_in_leaf: [100, 400]
+  num_leaves_from_depth: true          # num_leaves = 2^max_depth - 1
+  max_rounds: 1000
+  early_stopping_rounds: 50
+
+validation:
+  scheme: expanding                    # expanding | rolling
+  min_train_months: 24
+  test_months: 6
+  rolling_train_months: 36             # used only when scheme == rolling
+  inner_folds: 3                       # inner walk-forward folds inside each training window
+  early_stop_frac: 0.15                # tail of each inner-train slice used for early stopping
+  embargo_minutes: null                # null -> max_hold_minutes (max possible trade duration)
+  seeds: [0, 1, 2, 3, 4]
+
+sizing:
+  initial_equity: 10000
+  fixed_risk: 0.01
+  atr:
+    ref_window_bars: 5760              # trailing 20 trading days of 5m bars for the reference (median) ATR%
+    min_mult: 0.5
+    max_mult: 2.0
+  threshold:
+    grid_min: 0.15
+    grid_max: 0.60
+    grid_step: 0.01
+    min_keep_frac: 0.25                # threshold must keep >= 25% of inner-validation trades
+  kelly:
+    fraction: 0.25                     # quarter Kelly
+    max_risk: 0.02
+  round_lots: false                    # fractional lots: every policy trades exactly the intended size, so
+  lot_step: 0.01                       # comparisons are not distorted by the 0.01-lot floor once equity shrinks
+
+report:
+  bootstrap_block_days: 20
+  bootstrap_samples: 2000

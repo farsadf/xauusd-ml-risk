@@ -1,0 +1,131 @@
+{
+  "created_utc": "2026-11-24T20:57:58+00:00",
+  "git_commit": null,
+  "python": "3.10.22",
+  "platform": "macOS-27.2.1-arm64-arm-64bit",
+  "versions": {
+    "numpy": "1.26.4",
+    "pandas": "2.2.2",
+    "lightgbm": "3.3.5",
+    "scikit-learn": "1.5.1"
+  },
+  "input_files": [
+    "XAUUSD_2019.parquet",
+    "XAUUSD_2020.parquet",
+    "XAUUSD_2021.parquet",
+    "XAUUSD_2022.parquet",
+    "XAUUSD_2023.parquet",
+    "XAUUSD_2024.parquet",
+    "XAUUSD_2025.parquet",
+    "XAUUSD_2026.parquet"
+  ],
+  "input_digest": "c4365dfc6113b0afdd8ad7545c9d26a51848a70ce9dfa4b577afc18b8cec8467",
+  "config": {
+    "run_name": "xauusd_histdata_2019_2026",
+    "data": {
+      "path": "../xauusd-ml-data/histdata",
+      "start": "2019-01-01",
+      "end": "2026-11-13",
+      "bar_minutes": 5,
+      "spread_model": {
+        "type": "flat_usd",
+        "usd": 0.2
+      }
+    },
+    "output_dir": "../xauusd-ml-data/runs",
+    "primary": {
+      "ema_fast": 20,
+      "ema_slow": 50,
+      "swing_lookback": 10,
+      "tp_r": 2.5,
+      "min_risk_spreads": 2.0,
+      "max_entry_delay_minutes": 5,
+      "max_hold_minutes": 2880,
+      "warmup_bars": 200
+    },
+    "costs": {
+      "commission_per_side_per_lot": 2.25,
+      "contract_size": 100,
+      "extra_slippage_per_side": 0.0
+    },
+    "features": {
+      "atr_window": 20,
+      "bb_window": 20,
+      "bb_k": 2.0,
+      "stoch_k": 14,
+      "stoch_smooth": 3,
+      "stoch_d": 3,
+      "adx_window": 14,
+      "use_spread": false,
+      "include_trade_context": true
+    },
+    "model": {
+      "base_params": {
+        "objective": "binary",
+        "learning_rate": 0.03,
+        "feature_fraction": 0.8,
+        "bagging_fraction": 0.8,
+        "bagging_freq": 1,
+        "lambda_l2": 1.0,
+        "num_threads": 1,
+        "deterministic": true,
+        "force_row_wise": true,
+        "verbose": -1
+      },
+      "search": {
+        "max_depth": [
+          3,
+          5
+        ],
+        "min_data_in_leaf": [
+          100,
+          400
+        ]
+      },
+      "num_leaves_from_depth": true,
+      "max_rounds": 1000,
+      "early_stopping_rounds": 50
+    },
+    "validation": {
+      "scheme": "expanding",
+      "min_train_months": 24,
+      "test_months": 6,
+      "rolling_train_months": 36,
+      "inner_folds": 3,
+      "early_stop_frac": 0.15,
+      "embargo_minutes": null,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "sizing": {
+      "initial_equity": 10000,
+      "fixed_risk": 0.01,
+      "atr": {
+        "ref_window_bars": 5760,
+        "min_mult": 0.5,
+        "max_mult": 2.0
+      },
+      "threshold": {
+        "grid_min": 0.15,
+        "grid_max": 0.6,
+        "grid_step": 0.01,
+        "min_keep_frac": 0.25
+      },
+      "kelly": {
+        "fraction": 0.25,
+        "max_risk": 0.02
+      },
+      "round_lots": false,
+      "lot_step": 0.01
+    },
+    "report": {
+      "bootstrap_block_days": 20,
+      "bootstrap_samples": 2000
+    }
+  }
+}
