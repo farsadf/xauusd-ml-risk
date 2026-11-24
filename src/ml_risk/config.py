@@ -38,7 +38,7 @@ def _git_commit() -> str | None:
         root = Path(__file__).resolve().parents[2]
         out = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
                              capture_output=True, text=True, timeout=5)
-        dirty = subprocess.run(["git", "-C", str(root), "status", "--porcelain"],
+        dirty = subprocess.run(["git", "-C", str(root), "status", "--porcelain", "--", ".", ":!reports"],
                                capture_output=True, text=True, timeout=5).stdout.strip()
         return (out.stdout.strip() + ("-dirty" if dirty else "")) if out.returncode == 0 else None
     except Exception:
