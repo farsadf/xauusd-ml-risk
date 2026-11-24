@@ -112,8 +112,8 @@ The embargo is the maximum possible trade duration, 2 days.
 |---|---|
 | Single 70/30 time split, no purge or embargo | 12-fold purged and embargoed walk-forward |
 | "OOS" backtest window overlapped the training data | test windows strictly after training, enforced by tests |
-| Training rows appended across runs and parameter-sweep combos (duplicates) | dataset rebuilt deterministically from raw bars and cached by content hash |
-| Train/serve feature-name mismatch (model saw all-zero inputs in production) | sorted schema contract, a `strict=True` mode that raises on missing keys, and a Go parity test |
+| Training-data exporter only appends to one file, so rows can accumulate as duplicates across runs and parameter-sweep combos | dataset rebuilt deterministically from raw bars and cached by content hash |
+| Train/serve feature-name mismatch (one model would have received all-zero inputs at inference; the layer was not enabled live) | sorted schema contract, a `strict=True` mode that raises on missing keys, and a Go parity test |
 | Raw price used as a feature | price-normalised features only |
 | No random seeds | all seeds fixed; 5-seed stability reported |
 
@@ -189,7 +189,7 @@ Moving-block bootstrap (20-day blocks, 2,000 resamples) of the Sharpe difference
 - **Single instrument and timeframe** (XAUUSD, 5m). One toy primary strategy; a different primary signal could carry more learnable meta-information.
 - **Modelled, not observed, spread.** The spread is flat at $0.20, with a $0.40 sensitivity. It ignores rollover and news-time widening, which would hurt all policies and especially the small-stop trades. With real bid/ask ticks, the `spread_atr` feature and an observed spread can be switched on.
 - **Execution assumptions:** fills at the touch, no slippage beyond spread (configurable), a conservative stop-first rule within each minute, no partial fills, no swap or financing costs, and no margin constraints.
-- **Data:** a free vendor feed with documented, and here corrected, timezone quirks. HistData's 2023 coverage is slightly lighter (294 trading days).
+- **Data:** a free vendor feed with documented, and here corrected, timezone quirks. **The 2023 file has 542 intraday gaps (>10 min, outside the daily break) totalling about 704 missing hours**, against 4–13 gaps per year otherwise. The simulator crosses gaps with gap fills, and features span them. 2023 is also the stream's worst OOS year (net −0.157 R per trade). It is kept in the evaluation rather than removed after seeing results; treat the 2023 fold as lower-quality data.
 - **Overlapping labels.** Trades can overlap in time. Purging handles leakage, but samples aren't uniqueness-weighted, so the effective sample size is below the 10.8k rows.
 - **Statistical power:** about 660 OOS trades per fold. An AUC of 0.52 is within a fold-to-fold noise band of about ±0.03.
 
@@ -233,7 +233,8 @@ risk = kelly_risk_fraction(p, b=2.5, fraction=0.25, max_risk=0.02)
 ```
 configs/            default.yaml (HistData), spread_x2.yaml (sensitivity), sample.yaml (synthetic)
 data/sample/        synthetic 1m bid/ask sample (no real market data)
-scripts/            download_histdata.py, download_dukascopy.py (bid/ask alternative), check_timezone.py,
+scripts/            download_histdata.py, download_dukascopy.py (bid/ask alternative; resumable, but Dukascopy
+                    rate-limits heavily and a full 2019–2026 pull was never completed), check_timezone.py,
                     make_synthetic_sample.py
 src/ml_risk/        data · features · primary (toy) · labels · splits · model · backtest ·
                     train · evaluate · inference · pipeline · config
